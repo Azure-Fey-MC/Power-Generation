@@ -36,7 +36,7 @@ try:
 except Exception as e:
     print(e)
     with open("crash.log", "w") as f:
-        f.write(str(e))
+        f.write(str(e)+"\n")
         f.close()
     with open("crash.log", "a") as f:
         f.write(traceback.format_exc())
