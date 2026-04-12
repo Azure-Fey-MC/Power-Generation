@@ -15,8 +15,11 @@ try:
         subprocess.run('git clone https://github.com/Azure-Fey-MC/Power-Generation.git'.split(" "))
         repo = os.listdir(repo_folder)
         for item in repo:
-            if (not os.path.exists(os.path.join(repo_folder, item)) and operating_system == "Windows") or (operating_system != "Windows"):
-                os.rename(repo_folder+item, item)
+            with open(item, "w") as f:
+                with open(repo_folder+item, "r") as f2:
+                    f.write(f2.read())
+                    f2.close()
+                f.close()
         os.rmdir(repo_folder)
 
     import roll
