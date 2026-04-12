@@ -1,5 +1,5 @@
 try:
-    import os, subprocess, platform
+    import os, subprocess, platform, re
 
     operating_system = platform.system()
     print(f"Running on {operating_system}")
@@ -8,6 +8,9 @@ try:
     repo_folder = "./Power-Generation/"
     root_folder = "./"
     if operating_system == "Windows":
+        has_git = re.search(r"git version (\d+\.){2}\d+", str(subprocess.check_output("git --version".split(" "))))
+        if not has_git:
+            subprocess.run("winget install --id Git.Git -e --source winget".split(" "))
         git_folder.replace("/", "\\")
         repo_folder.replace("/", "\\")
         root_folder.replace("/", "\\")
@@ -19,7 +22,10 @@ try:
         subprocess.run('git clone https://github.com/Azure-Fey-MC/Power-Generation.git'.split(" "))
         repo = os.listdir(repo_folder)
         for item in repo:
-            subprocess.run(f"mv -f {repo_folder}{item} {root_folder}{item}".split(" "))
+            if operating_system == "Windows":
+                subprocess.run(f"move /y {repo_folder}{item} {root_folder}{item}".split(" "))
+            else:
+                subprocess.run(f"mv -f {repo_folder}{item} {root_folder}{item}".split(" "))
         os.rmdir(repo_folder)
 
     import roll
