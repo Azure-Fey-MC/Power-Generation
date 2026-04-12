@@ -1,9 +1,14 @@
 import os
 import re
+import platform
 from time import sleep
 from json import dump
 
 def convert(path="./"):
+    def windows(linux_path):
+        if platform.system() == "Windows":
+            linux_path.replace("/", "\\")
+        return linux_path
     pool_obj = {}
     converted = 0
     def remove_empty(list_to_empty):
@@ -42,9 +47,9 @@ def convert(path="./"):
                 else:
                     print(f"{file_path} is not a valid module, skipping...")
                 file2.close()
-        elif file_path.endswith(".json") and not file_path in ["config.json"] and path != "./modules/":
+        elif file_path.endswith(".json") and not file_path in ["config.json"] and path != windows("./modules/"):
             with open(file_path2,"r") as file2:
-                with open("modules/"+file_path, "w") as file3:
+                with open(windows("./modules/")+file_path, "w") as file3:
                     file3.write(file2.read())
                     file3.close()
                 file2.close()
