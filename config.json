@@ -1,0 +1,28 @@
+{
+  "_comments": {
+    "dual_powers": "dual_powers is formatted as namespace:power no matter what your power format is",
+    "power_format": "Valid variables are ${namespace}, ${power} and ${slots}, ${slots} is only used when Ability Replication from heroes is rolled",
+    "slots_format": "Valid variables are ${count} and ${s}, ${s} just adds an s if there are more than one slots (eg. 'with ${count} slot${s})"
+  },
+  "modules": ["heroes","trait"],
+  "dual_powers": ["Catalyst (heroes)"],
+  "dual_namespaces": ["trait"],
+  "power_format": "${slots} ${power} (${namespace})",
+  "slots_format": "${count} slot",
+  "misc_powers": {
+    "ss": [],
+    "s": [],
+    "a": [],
+    "b": [],
+    "c": [],
+    "f": []
+  },
+  "weights": {
+    "ss": 2,
+    "s": 4,
+    "a": 8,
+    "b": 51,
+    "c": 20,
+    "f": 15
+  }
+}
