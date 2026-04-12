@@ -11,4 +11,4 @@ else:
 
 import roll
 
-roll.run()
+roll.init()
