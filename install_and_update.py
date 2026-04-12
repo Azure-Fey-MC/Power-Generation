@@ -6,20 +6,20 @@ try:
 
     git_folder = "./.git/"
     repo_folder = "./Power-Generation/"
+    root_folder = "./"
     if operating_system == "Windows":
         git_folder.replace("/", "\\")
         repo_folder.replace("/", "\\")
+        root_folder.replace("/", "\\")
+    if os.path.exists(git_folder[:-1]) and os.path.isfile(git_folder[:-1]):
+        os.remove(git_folder[:-1])
     if os.path.exists(git_folder):
         subprocess.run('git pull'.split(" "))
     else:
         subprocess.run('git clone https://github.com/Azure-Fey-MC/Power-Generation.git'.split(" "))
         repo = os.listdir(repo_folder)
         for item in repo:
-            with open(item, "w") as f:
-                with open(repo_folder+item, "r") as f2:
-                    f.write(f2.read())
-                    f2.close()
-                f.close()
+            subprocess.run(f"mv -f {repo_folder}{item} {root_folder}{item}".split(" "))
         os.rmdir(repo_folder)
 
     import roll
