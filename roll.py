@@ -3,16 +3,16 @@ import random, json
 from time import sleep
 if os.path.exists("converter.py"):
     from converter import convert
+
+    # Attempt to parse files into modules
+    convert()
 else:
-    print("It is recommended to get the converter script from ")
+    print("It is recommended to get the converter script from https://raw.githubusercontent.com/Azure-Fey-MC/Power-Generation/refs/heads/main/converter.py")
 
 # Load Config
 with open('config.json', "r") as f:
     config = json.load(f)
     f.close()
-
-# Attempt to parse files into modules
-convert()
 
 # Create pool of powers
 def truey_str(string):
