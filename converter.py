@@ -3,7 +3,7 @@ import re
 from time import sleep
 from json import dump
 
-def convert():
+def convert(path="./"):
     pool_obj = {}
     converted = 0
     def remove_empty(list_to_empty):
@@ -12,9 +12,10 @@ def convert():
             if item != "":
                 new_list.append(item)
         return new_list
-    for file_path in os.listdir("./"):
+    for file_path in os.listdir(path):
+        file_path2 = path + file_path
         if re.search(r'(?!\.).*?\.(?!json)([a-z]|\d)+',file_path) and not file_path in ["roll.py","converter.py","install_and_update.py"]:
-            with open(file_path,"r") as file2:
+            with open(file_path2,"r") as file2:
                 name = re.search(r".*(?=\.)",file2.name).group(0).replace(".","/")
                 file_contents = remove_empty(file2.read().split("\n"))
                 for line in file_contents:
@@ -35,21 +36,21 @@ def convert():
                     with open(name + ".json", "w") as file3:
                         print(f"[{name}] {pool_obj}")
                         dump(pool_obj, file3, indent=4)
-                        os.remove(file_path)
+                        os.remove(file_path2)
                         converted += 1
                         file3.close()
                 else:
                     print(f"{file_path} is not a valid module, skipping...")
                 file2.close()
-        elif file_path.endswith(".json") and not file_path in ["config.json"]:
-            with open(file_path,"r") as file2:
+        elif file_path.endswith(".json") and not file_path in ["config.json"] and path != "./modules/":
+            with open(file_path2,"r") as file2:
                 with open("modules/"+file_path, "w") as file3:
                     file3.write(file2.read())
                     file3.close()
                 file2.close()
-            os.remove(file_path)
+            os.remove(file_path2)
             converted += 1
 
     if converted > 0:
         print(f"\n\nConverted {converted} modules")
-        sleep(5)
+        sleep(2)

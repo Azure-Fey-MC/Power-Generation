@@ -11,5 +11,4 @@ else:
 
 import roll
 
-roll.convert()
 roll.run()

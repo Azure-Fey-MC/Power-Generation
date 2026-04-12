@@ -5,6 +5,7 @@ if os.path.exists("converter.py"):
     from converter import convert
 
     # Attempt to parse files into modules
+    convert("./modules/")
     convert()
 else:
     print("It is recommended to get the converter script from https://raw.githubusercontent.com/Azure-Fey-MC/Power-Generation/refs/heads/main/converter.py")
