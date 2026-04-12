@@ -13,7 +13,7 @@ def convert():
                 new_list.append(item)
         return new_list
     for file_path in os.listdir("./"):
-        if re.search(r'(?!\.).*?\.(?!json)([a-z]|\d)+',file_path) and not file_path in ["roll.py","converter.py"]:
+        if re.search(r'(?!\.).*?\.(?!json)([a-z]|\d)+',file_path) and not file_path in ["roll.py","converter.py","install_and_update.py"]:
             with open(file_path,"r") as file2:
                 name = re.search(r".*(?=\.)",file2.name).group(0).replace(".","/")
                 file_contents = remove_empty(file2.read().split("\n"))
