@@ -10,7 +10,10 @@ try:
     repo_folder = "./Power-Generation/"
     root_folder = "./"
     if operating_system == "Windows":
-        has_git = re.search(r"git version (\d+\.){2}\d+", str(subprocess.check_output("git --version".split(" "))))
+        try:
+            has_git = re.search(r"git version (\d+\.){2}\d+", str(subprocess.check_output("git --version".split(" "))))
+        except Exception as e:
+            has_git = False
         if not has_git:
             subprocess.run("winget install --id Git.Git -e --source winget".split(" "))
         git_folder.replace("/", "\\")
