@@ -9,6 +9,7 @@ def convert(path="./"):
         if platform.system() == "Windows":
             linux_path.replace("/", "\\")
         return linux_path
+    path = windows(path)
     pool_obj = {}
     converted = 0
     def remove_empty(list_to_empty):
