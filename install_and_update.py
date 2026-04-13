@@ -9,13 +9,32 @@ try:
     git_folder = "./.git/"
     repo_folder = "./Power-Generation/"
     root_folder = "./"
+    try:
+        has_git = re.search(r"git version (\d+\.){2}\d+", str(subprocess.check_output("git --version".split(" "))))
+    except FileNotFoundError as e:
+        has_git = False
+    if not has_git:
+        install_git=input("Git not found but is required, do you want to install git? (script will close if you decline) (y/n)")
+        if install_git.lower()=="y":
+            if operating_system == "Windows":
+                subprocess.run("winget install --id Git.Git -e --source winget".split(" "))
+            elif operating_system == "Darwin":
+                subprocess.run('/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'.split(" "))
+                subprocess.run("brew install git".split(" "))
+            elif platform.freedesktop_os_release()["ID_LIKE"].__contains__("ubuntu") or platform.freedesktop_os_release()["ID_LIKE"].__contains__("debian"):
+                subprocess.run("sudo apt install git -y".split(" "))
+            elif platform.freedesktop_os_release()["ID_LIKE"].__contains__("fedora"):
+                try:
+                    subprocess.run("sudo dnf install git -y".split(" "))
+                except Exception as e:
+                    print('Package manager "dnf" not found, please install git yourself')
+            elif platform.freedesktop_os_release()["ID_LIKE"].__contains__("arch"):
+                subprocess.run("sudo pacman -S git".split(" "))
+            else:
+                print("Package manager could not be determined, please install git yourself")
+        else:
+            raise FileNotFoundError("Unable to continue without git, use roll.py instead. (Automatic updates will not happen)")
     if operating_system == "Windows":
-        try:
-            has_git = re.search(r"git version (\d+\.){2}\d+", str(subprocess.check_output("git --version".split(" "))))
-        except Exception as e:
-            has_git = False
-        if not has_git:
-            subprocess.run("winget install --id Git.Git -e --source winget".split(" "))
         git_folder.replace("/", "\\")
         repo_folder.replace("/", "\\")
         root_folder.replace("/", "\\")
@@ -43,3 +62,6 @@ except Exception as e:
         f.close()
     with open("crash.log", "a") as f:
         f.write(traceback.format_exc())
+
+def init():
+    print("Running install script from external source")
