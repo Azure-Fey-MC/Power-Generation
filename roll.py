@@ -11,6 +11,7 @@ convert()
 dotenv.load_dotenv()
 with open('./config.json', "r") as f:
     default_config = json.load(f)
+roll_category_id = int(os.getenv('ROLL_CATEGORY'))
 
 def list_replace(full_list, item, replacement):
     full_list[full_list.index(item)] = replacement
@@ -60,8 +61,37 @@ def build_pool(config, force_roll=False):
         pool += pools[rank]
     return pool, missing_modules
 
+def do_roll(config, rolls=5, force_roll=False):
+    # Shared roll logic used by both the slash command and the auto-roll event.
+    pool, missing_modules = build_pool(config, force_roll)
+
+    # Generate power choices
+    def replication_slots():
+        power_gen = random.choice(pool)
+        if power_gen == format_power("heroes", "Ability Replication", config):
+            while power_gen in pool:
+                pool.remove(power_gen)
+            slot_gen = random.choice([1] * 15 + [2, 2, 3, 4, 5])
+            power_gen = format_power("heroes", "Ability Replication", config, slot_gen)
+        return power_gen
+
+    generated = []
+    remaining = rolls
+    while remaining > 0:
+        power_rolled = replication_slots()
+        while power_rolled in pool:
+            pool.remove(power_rolled)
+        for namespace in config['dual_namespaces']:
+            if power_rolled.__contains__(namespace) or power_rolled in config['dual_powers'] and not power_rolled.__contains__("&"):
+                power_rolled = f"{power_rolled} & {replication_slots()}"
+        generated.append(f"- {power_rolled}")
+        remaining -= 1
+
+    return pool, missing_modules, generated
+
 # Discord bot setup
 intents = discord.Intents.default()
+intents.guilds = True
 client = discord.Client(intents=intents)
 tree = app_commands.CommandTree(client)
 
@@ -86,7 +116,7 @@ async def roll(interaction: discord.Interaction, rolls: int = 5, config_file: di
     else:
         config = default_config
 
-    pool, missing_modules = build_pool(config, force_roll)
+    pool, missing_modules, generated = do_roll(config, rolls, force_roll)
 
     if len(missing_modules) > 0:
         missing_list = "\n".join(f"- `{m}`" for m in missing_modules)
@@ -96,31 +126,23 @@ async def roll(interaction: discord.Interaction, rolls: int = 5, config_file: di
         )
         return
 
-    # Generate power choices
-    def replication_slots():
-        power_gen = random.choice(pool)
-        if power_gen == format_power("heroes", "Ability Replication", config):
-            while power_gen in pool:
-                pool.remove(power_gen)
-            slot_gen = random.choice([1] * 15 + [2, 2, 3, 4, 5])
-            power_gen = format_power("heroes", "Ability Replication", config, slot_gen)
-        return power_gen
-
-    generated = []
-    remaining = rolls
-    while remaining > 0:
-        power_rolled = replication_slots()
-        while power_rolled in pool:
-            pool.remove(power_rolled)
-        for namespace in config['dual_namespaces']:
-            if power_rolled.__contains__(namespace) or power_rolled in config['dual_powers'] and not power_rolled.__contains__("&"):
-                power_rolled = f"{power_rolled} & {replication_slots()}"
-        generated.append(f"- {power_rolled}")
-        remaining -= 1
-
     # Print everything
     message = "Pick one of the following powers:\n" + "\n".join(generated)
     await interaction.response.send_message(message)
+
+@client.event
+async def on_guild_channel_create(channel):
+    # Auto-roll with default values when a channel is created in the roll category
+    if isinstance(channel, discord.TextChannel) and channel.category_id == roll_category_id:
+        pool, missing_modules, generated = do_roll(default_config)
+        if missing_modules:
+            missing_list = "\n".join(f"- `{m}`" for m in missing_modules)
+            await channel.send(f"⚠️ The following modules could not be found:\n{missing_list}")
+            return
+
+        # Print everything
+        message = "Pick one of the following powers:\n" + "\n".join(generated)
+        await channel.send(message)
 
 @client.event
 async def on_ready():
