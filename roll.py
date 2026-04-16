@@ -1,21 +1,12 @@
-import os, random, json, platform
-from time import sleep
-def winCheck(linux_path):
-    if platform.system() == "Windows":
-        linux_path = linux_path.replace("/", "\\")
-    return linux_path
-if os.path.exists("./converter.py"):
-    from converter import convert
+import os, random, json
+from converter import convert
 
-    # Attempt to parse files into modules
-    if platform.system() != "Windows":
-        convert("./modules/")
-    convert()
-else:
-    print("It is recommended to get the converter script from https://raw.githubusercontent.com/Azure-Fey-MC/Power-Generation/refs/heads/main/converter.py")
+# Attempt to parse files into modules
+convert("./modules/")
+convert()
 
 # Load Config
-with open(winCheck('./config.json'), "r") as f:
+with open('./config.json', "r") as f:
     config = json.load(f)
     f.close()
 
@@ -41,7 +32,7 @@ pool = []
 for module in config['modules']:
     if os.path.exists("./modules/"+module) or os.path.exists("./modules/"+module+".json"):
         if os.path.isdir("modules/"+module):
-            module_group = os.listdir(winCheck("./modules/")+module)
+            module_group = os.listdir("./modules/"+module)
             for internal_module in module_group:
                 if internal_module.endswith(".json"):
                     list_replace(module_group, internal_module, module + "/" + internal_module[:-5])
@@ -50,7 +41,7 @@ for module in config['modules']:
             config['modules'].remove(module)
             config['modules'] += module_group
         else:
-            with open(winCheck("modules/")+module+".json", "r") as f:
+            with open("modules/"+module+".json", "r") as f:
                 module_pool = json.load(f)
                 f.close()
             for rank in module_pool:
@@ -66,7 +57,6 @@ for rank in pools:
     pool += pools[rank]
 
 #User inputs
-minutes=float(input("How many minutes do you want the script to wait after generation before closing? \n"))
 rolls=input("How many times do you want to roll? (leave blank for standard roll count) \n")
 if rolls == "":
     rolls = 5
@@ -98,9 +88,3 @@ while rolls > 0:
 print("Pick one of the following powers:\n")
 for power in generated:
     print(power)
-
-#Final sleep
-sleep(minutes*60)
-
-def init():
-    run = True
