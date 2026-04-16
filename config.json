@@ -4,7 +4,7 @@
     "power_format": "Valid variables are ${namespace}, ${power} and ${slots}, ${slots} is only used when Ability Replication from heroes is rolled",
     "slots_format": "Valid variables are ${count} and ${s}, ${s} just adds an s if there are more than one slots (eg. 'with ${count} slot${s})"
   },
-  "modules": ["heroes","trait"],
+  "modules": ["heroes","trait","fsang","eop"],
   "dual_powers": ["Catalyst (heroes)"],
   "dual_namespaces": ["trait"],
   "power_format": "${slots} ${power} (${namespace})",
