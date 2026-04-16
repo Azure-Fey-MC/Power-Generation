@@ -1,6 +1,6 @@
 import discord
 from discord import app_commands
-import os, random, json, io
+import os, random, json, dotenv
 from converter import convert
 
 # Attempt to parse files into modules
@@ -8,6 +8,7 @@ convert("./modules/")
 convert()
 
 # Load Config
+dotenv.load_dotenv()
 with open('./config.json', "r") as f:
     default_config = json.load(f)
 
@@ -115,4 +116,4 @@ async def on_ready():
     await tree.sync()
     print(f"Logged in as {client.user}")
 
-client.run("YOUR_BOT_TOKEN")
+client.run(os.getenv('DISCORD_TOKEN'))
