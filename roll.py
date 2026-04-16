@@ -12,12 +12,6 @@ dotenv.load_dotenv()
 with open('./config.json', "r") as f:
     default_config = json.load(f)
 
-def truey_str(string):
-    if string.lower() in ["true", "y", "yes", "1"]:
-        return True
-    else:
-        return False
-
 def list_replace(full_list, item, replacement):
     full_list[full_list.index(item)] = replacement
 
@@ -32,9 +26,10 @@ def format_power(namespace, power, config, slots=0):
     return formatted.strip()
 
 # Create pool of powers
-def build_pool(config):
+def build_pool(config, force_roll=False):
     pools = {rank: list(powers) for rank, powers in config['misc_powers'].items()}
     modules = list(config['modules'])
+    missing_modules = []
 
     for module in modules:
         if os.path.exists("./modules/" + module) or os.path.exists("./modules/" + module + ".json"):
@@ -52,12 +47,18 @@ def build_pool(config):
                     for power in module_pool[rank]:
                         list_replace(module_pool[rank], power, format_power(module, power, config))
                     pools[rank] += module_pool[rank]
+        else:
+            missing_modules.append(module)
+
+    # If any modules are missing and force_roll is off, return early with the missing list
+    if missing_modules and not force_roll:
+        return None, missing_modules
 
     pool = []
     for rank in pools:
         pools[rank] *= config['weights'][rank]
         pool += pools[rank]
-    return pool
+    return pool, missing_modules
 
 # Discord bot setup
 intents = discord.Intents.default()
@@ -67,11 +68,13 @@ tree = app_commands.CommandTree(client)
 @tree.command(name="roll", description="Roll a set of powers to pick from.")
 @app_commands.describe(
     rolls="How many powers to roll (defaults to standard roll count if left blank)",
-    config_file="Optional config JSON file to use instead of the default"
+    config_file="Optional config JSON file to use instead of the default",
+    force_roll="If true, continues rolling even if a module is missing (default: false)"
 )
-async def roll(interaction: discord.Interaction, rolls: int = 5, config_file: discord.Attachment = None):
+async def roll(interaction: discord.Interaction, rolls: int = 5, config_file: discord.Attachment = None, force_roll: bool = False):
     # User inputs (now handled as slash command arguments)
-    # rolls: int = 5  →  defaults to 5, or user can pass a custom value
+    # rolls: int = 5          → defaults to 5, or user can pass a custom value
+    # force_roll: bool = False → if true, skips missing modules silently
 
     # Load uploaded config if provided, otherwise fall back to default
     if config_file is not None:
@@ -83,7 +86,15 @@ async def roll(interaction: discord.Interaction, rolls: int = 5, config_file: di
     else:
         config = default_config
 
-    pool = build_pool(config)
+    pool, missing_modules = build_pool(config, force_roll)
+
+    if len(missing_modules) > 0:
+        missing_list = "\n".join(f"- `{m}`" for m in missing_modules)
+        await interaction.response.send_message(
+            f"The following modules could not be found:\n{missing_list}\n\nUse `force_roll: True` to roll anyway without them.",
+            ephemeral=True
+        )
+        return
 
     # Generate power choices
     def replication_slots():
